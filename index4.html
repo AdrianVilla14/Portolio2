@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Island Empire: Land Conquest - Ultimate Edition</title>
+  <!-- Google Fonts for UI -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&family=Roboto+Mono:wght@400;700&display=swap">
+  <meta name="author" content="Adrian Villalon">
+  <meta name="description" content="Created by Adrian Villalon | Github: https://github.com/AdrianVilla14 | All credits to the Empire Architect.">
+  <style>
+    body {
+      background: radial-gradient(circle at 60vw 20vh, #486a92 60%, #2e3d52 100%);
+      color: #eee;
+      font-family: 'Quicksand', Arial, sans-serif;
+      margin: 0;
+    }
+    h1 {
+      text-align: center;
+      color: #FFD700;
+      letter-spacing: 2px;
+      margin-top: 28px;
+      font-size: 2.8em;
+      font-family: 'Roboto Mono', monospace;
+      filter: drop-shadow(2px 2px 0 #222);
+    }
+    h2 {
+      text-align: center;
+      color: #93eaff;
+      font-size: 1.18em;
+      margin-bottom: 12px;
+      font-family: 'Quicksand', sans-serif;
+      text-shadow: 0 1px 8px #4689b9, 1px 2px 0 #49a5c6;
+    }
+    #storyBar {
+      max-width:900px; margin:0 auto 24px auto; text-align:center; background:#233f5437; border-radius:12px;
+      padding: 16px 18px; color: #FFD700; font-family:'Quicksand'; font-size:1.12em; box-shadow:0 2px 16px #2852ac32;
+    }
+    #githubCredit {
+      font-size:1.1em; padding-top:6px; text-align:center; color:#b6eaed;
+    }
+    #githubCredit a {
+      color:#70f3e3; text-decoration:underline; font-weight:bold;
+    }
+    #howToIcon {
+      position: fixed;
+      top: 9px;
+      right: 17px;
+      font-size: 2.4em;
+      color: #FFD700;
+      background: #2e3d52d7;
+      padding: 0px 9px 0 7px;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 8px #FFD7004a;
+      transition: background 0.13s, color 0.14s;
+      z-index: 1919;
+    }
+    #howToIcon:hover { background: #95ffd0; color:#047433; }
+    #howToModal {
+      display:none; position:fixed; left:0; top:0; width:100vw; height:100vh;
+      background: #213452e0; z-index:2222; color: #fff;
+      align-items: center; justify-content: center; font-size:1.14em;
+    }
+    #howToContent {
+      background: #375ea3ed; color: #fff; border-radius: 16px;
+      max-width:480px; padding: 32px 29px;
+      margin:65px auto 0; box-shadow: 0 7px 34px #174081b3; font-family:'Quicksand';
+      border:2px solid #FFD700;
+    }
+    #howToContent h2 { font-size:1.35em;color:#FFD700;text-shadow:0 1px 7px #fff8; margin-bottom:10px;}
+    #howToContent ul { font-size:1.09em;margin-left:10px; }
+    #closeHowTo { background:#FFD700;border:none; font-weight:700; border-radius:6px; color:#172; padding:6px 14px;}
+    #resourceBar {
+      position: sticky; top: 0;
+      background: #253047cc;
+      display: flex; justify-content: center;
+      gap: 38px; padding: 13px 0 2px 0; box-shadow: 0 3px 16px #2236;
+      z-index: 200; font-size: 1.11em;
+    }
+    #resourceBar span, #resourceBar strong {
+      display: inline-block; min-width: 75px; padding: 2px 8px; border-radius: 14px;
+      background: #364f6ab2; color: #FFD700; margin-right: 8px;
+      font-family: 'Quicksand', sans-serif; font-weight: 700; box-shadow: 0 0 4px #223; transition: background 0.15s;
+    }
+    #game { display: flex; flex-wrap: wrap; max-width: 1375px; margin: 0 auto; gap: 25px; justify-content: center; align-items: flex-start; }
+    #mapPanel { min-width: 458px; }
+    #map {
+      background: #3c5637;
+      border-radius: 20px;
+      box-shadow: 0 0 38px #0005;
+      padding: 16px; display: inline-block; margin-top: 18px;
+      position: relative; user-select: none;
+      border: 2.5px solid #65adc3;
+      perspective: 600px;
+    }
+    .row { display: flex; }
+    .tile {
+      width: 50px; height: 50px; font-size: 25px;
+      margin: 2px; border: 2.6px solid #728c66;
+      border-radius: 13px;
+      text-align: center; cursor: pointer; position: relative;
+      user-select: none; overflow: hidden; font-family: 'Quicksand', Arial;
+      background: linear-gradient(120deg,#e5f4c1 60%,#b9dcb7 100%);
+      box-shadow: 0 2px 8px #1118;
+      transition: transform .31s cubic-bezier(.4,2.2,.51,1), box-shadow 0.21s, border-color 0.21s;
+      filter: drop-shadow(2px 0px 6px #4a5745);
+    }
+    .tile.selected {
+      border-color: #FFD700;
+      box-shadow: 0 0 26px 7px #FFD70088;
+      z-index: 10; transform: scale(1.12) rotateY(8deg);
+    }
+    .tile:hover {
+      transform: scale(1.09) rotateY(10deg) rotateZ(3deg);
+      border-color:#8efab2; box-shadow:0 0 19px #aeff8140;
+    }
+    .tile.preview {
+      box-shadow: 0 0 32px #87b82693;
+      background: linear-gradient(115deg,#fff47e 58%,#e9ecae 100%);
+      border-color: #FFD700;
+      transform: scale(1.09) perspective(600px) rotateY(22deg) rotateZ(2deg);
+    }
+    .tile.ownedAnim {
+      animation: popOwnedTile .42s cubic-bezier(.66,.44,1.14,.89);
+    }
+    @keyframes popOwnedTile { 
+      0% { transform: scale(.91) rotateY(17deg) }
+      67% { transform: scale(1.16) rotateY(-7deg)}
+      100% { transform: scale(1.03) rotateY(0deg)}
+    }
+    .player-owned    { background: linear-gradient(135deg,#f0fb89 10%, #ffe637 78%, #fafee7 100%);
+      border-color: #FFD700; }
+    .ai-owned        { background: linear-gradient(120deg,#85d3ff 5%,#85c7e3 80%, #eef7ff 100%);
+      border-color: #29c6ea; }
+    .city { border: 2.5px solid #46a040 !important; }
+    .mountain { background: linear-gradient(100deg,#c0c0c0 0%,#868686 65%,#eeeeee 97%); color: #fff; }
+    .tile.mountain {
+      box-shadow: 0 0 15px #222b;
+      background: repeating-linear-gradient(107deg,#9cac9a 7px,#c0c0c0 15px,#868686 22px);
+      animation: mountainShimmer 1.8s linear infinite alternate;
+    }
+    @keyframes mountainShimmer { 0% {box-shadow:0 0 8px #8885;} 100%{box-shadow:0 0 24px #ddd9;} }
+    .tile.forest3d {
+      background: linear-gradient(120deg,#79d68f 10%, #3a5c46 70%, #daffd7 100%);
+      border: 3.1px solid #309a45;
+      box-shadow: 0 8px 30px #41c05c52;
+      perspective: 450px; transform-style: preserve-3d;
+    }
+    .tile.water3d {
+      background: linear-gradient(110deg, #64d9ee 17%,#3ad8ff 70%,#b3e8f4 100%);
+      border: 2.7px solid #35a1e2;
+      box-shadow: 0 6px 23px #38aade4f;
+      perspective: 400px; transform-style: preserve-3d;
+    }
+    .forest { background: linear-gradient(105deg,#74d697 10%,#55a97d 95%);}
+    .army { border: 2.5px solid #da1e1e; animation: armyPulse 1.2s infinite cubic-bezier(.3,.44,1.1,1.2); box-shadow: 0 0 16px #e738389a;}
+    @keyframes armyPulse { 0%{box-shadow:0 0 12px #da2e1e;} 60%{box-shadow:0 0 38px #e84d00b8;} 100%{box-shadow:0 0 9px #842424;}}
+    .fog { background: radial-gradient(circle,#222e 90%,#1a273a 99%);
+      color: #222; animation: fogReveal 0.62s cubic-bezier(.22,.65,.61,1.7); pointer-events: none; filter: blur(.5px);}
+    @keyframes fogReveal { from{filter:blur(7px);} to{filter:blur(.2px);} }
+    .tile .icon { font-size: 2em; display: inline-block; vertical-align: top;}
+    .tile .army-anim {
+      animation: armyMove .88s infinite alternate; position: absolute; left: 2px; top: 3px;
+    }
+    @keyframes armyMove { 0%{transform:translateY(0px);}100%{transform:translateY(-5px);} }
+    .tile .city-anim { animation: cityGrow 1.7s infinite cubic-bezier(.3,.44,1.1,1.2); position: absolute; left: 8px; top: 15px; }
+    @keyframes cityGrow { 0%{transform:scale(1);}55%{transform:scale(1.15);}100%{transform:scale(1);} }
+    #sidebar { min-width: 370px; background: #283146f2; border-radius: 16px; box-shadow: 0 3px 26px #111a; padding: 25px 22px; color: #eee; font-size: 1.17em; height: 735px; max-height: 83vh; overflow-y: auto; }
+    button, select { padding: 8px 13px; margin: 4px; border-radius: 7px; border: none; background: linear-gradient(101deg,#FFD700 75%, #fff 100%); font-weight: bold; color: #223;
+      font-family: 'Quicksand', sans-serif; font-size: 1em; cursor: pointer;
+      box-shadow: 0 1px 8px #a7a78854; transition: background 0.15s, box-shadow 0.13s;}
+    button:active { background:#bffc9b; box-shadow:0 0 16px #bffc9b44;}
+    button:disabled { background: #e7cfc9; cursor: not-allowed;}
+    .panel { margin-bottom: 24px; background: #055b82c2; border-radius: 12px; padding: 22px 15px; box-shadow: 0 0 10px #0007; color: #eef; font-size: 1.04em;}
+    .panel strong { color: #FFD700; }
+    .resource-table td { font-size: 18px; padding: 4px 12px; }
+    .action-btns button { margin: 7.5px 0;}
+    #endturn { background: linear-gradient(110deg,#FFD700 70%,#94ffdb 100%); color: #184; border: 2px solid #FFD700; font-size: 1.16em;
+      letter-spacing: 1.6px; box-shadow: 0 0 12px #FFD70091;}
+    #hydrogenNukeBtn { background: linear-gradient(111deg,#e21739 16%, #FFD700 100%); color: #fff; font-weight:700; border:2px solid #e21739; margin:8px 0 5px 0; box-shadow:0 0 16px #e21739ab;}
+    #hydrogenNukeBtn:hover { background:#FFD700; color:#e21739;}
+    #endturn.turn-flash { animation: flashTurn 1.0s;}
+    @keyframes flashTurn { 0%{background:#FFD700;} 13%{background:#ffd700;} 40%{background:#00cefa;} 100%{background:#FFD700;} }
+    #nukeModal {display:none;position:fixed;z-index:9001;left:0;top:0;width:100vw;height:100vh;background:#390e27d0;align-items:center;justify-content:center;}
+    #nukeModalContent { background: #FFD700; color: #134; padding:26px 44px; border-radius:22px; box-shadow:0 7px 44px #e21739d1; text-align:center; font-size:1.18em;}
+    #nukeModalContent button { margin: 7px 17px; border-radius:6px; padding:7px 22px; }
+    .previewResource {
+      margin-top:8px;font-size:1em;padding:7px 8px;border-radius:7px;background:#0ba1732b;color:#ffe637;
+      box-shadow:0 0 5px #65adc3b5;
+      border:1.3px solid #FFD700;
+      text-align:center;
+    }
+    .log { font-size: 16px; margin-top: 16px;
+      background: #1a243ea0; border-radius: 8px; padding: 8px 15px;
+      min-height: 95px; box-shadow: 0 0 9px #223d; color: #f2fae5;
+      font-family: 'Roboto Mono', monospace;}
+    #floatingMsg { position:fixed; left:62vw; top:13vh; padding:13px 38px; font-size:1.45em; font-weight:700;
+      background: linear-gradient(100deg,#FFD700,#ddf7a7); color:#286515; border-radius:17px;
+      box-shadow:0 2px 40px #FFD700ab; opacity:0; pointer-events:none; z-index:999;
+      transform: scale(0.95); animation: floatMsg 1.4s cubic-bezier(.3,1.4,.69,1.3) forwards; visibility: hidden;}
+    @keyframes floatMsg { 0%{opacity:0;transform:scale(.93);} 18%{opacity:.88;transform:scale(1.03);}
+      55%{opacity:.88;}100%{opacity:0;transform:scale(1.03);} }
+    #techPanel { background:#eef; color:#134; font-family: 'Roboto Mono', monospace; padding:11px 11px; border-radius:9px; margin:13px 0; box-shadow:0 1px 14px #8adfed66; display:none;}
+    #showTechs { background:#6489d7; color:#124; box-shadow:0 0 8px #31c9be88; }
+    #showTechs.selected { background:#FFD700;}
+    .footer { margin: 33px auto 8px auto; text-align: center; color: #77c; filter: blur(0px) brightness(.98); font-size: 1.09em;}
+    .progressBar { width: 99%; height: 16px; background: #aef172; border-radius: 9px;
+      margin-bottom: 7px; overflow: hidden; box-shadow:0 0 8px #447c28ab; position:relative;}
+    .progressBar .inner { position:absolute; left:0; top:0; height:100%; background:#FFD700; transition:width 0.56s; border-radius:7px;}
+
+    @media(max-width:1200px) { #game { flex-direction:column; gap:1.3em; } #sidebar { min-width:230px; max-width:99vw; padding:2vw; } #mapPanel { min-width:260px; } }
+    @media(max-width:700px) { .tile{ width:34px;height:34px;font-size:17px;} #sidebar { height:auto; min-width:140px;}}
+  </style>
+</head>
+<body>
+  <h1>Island Empire: Land Conquest</h1>
+  <h2>An epic journey to power, wisdom, and legacy.</h2>
+  <div id="storyBar">
+    <strong>Story:</strong> Born as a visionary ruler, you must build, expand, and defend a mighty island empire against cunning rivals.
+    Use resources, unlock technologies, and carve your own legend for generations. Will your reign create history... or be wiped off by a Hydrogen Nuke?
+  </div>
+  <div id="githubCredit">
+    Created by <strong>Adrian Villalon</strong> |
+    <a href="https://github.com/AdrianVilla14" target="_blank">Github: AdrianVilla14</a> | &copy; All rights reserved
+  </div>
+  <span id="howToIcon" title="Show How To Play">❓</span>
+  <div id="howToModal">
+    <div id="howToContent">
+      <h2>How to Play: Island Empire</h2>
+      <ul>
+        <li><strong>Expand</strong>: Right-click neutral tiles adjacent to your empire. Preview yields, then buy strategic tiles!</li>
+        <li><strong>Review</strong>: Click any tile for a pop-up showing its resource increase <b>per turn</b> (Food, Gold, Science).</li>
+        <li><strong>Build & Upgrade</strong>: On owned tiles, build cities, recruit armies, or fortify borders for defense/bonus.</li>
+        <li><strong>Attack</strong>: Use adjacent armies to attack enemy tiles. Preview battle outcome.
+        <li><strong>Techs</strong>: Unlock upgrades for new powers and gameplay events!</li>
+        <li><strong>Events</strong>: Surprise storms, treasure finds, or enemy sabotage can happen randomly!</li>
+        <li><strong>Hydrogen Nuke</strong>: The ultimate reset. But beware: Your legacy will be lost forever!</li>
+        <li><span style="color:#FFD700">Autosave: Continue anytime—your empire always persists (same browser).</span></li>
+      </ul>
+      <button id="closeHowTo">Got It!</button>
+    </div>
+  </div>
+  <div id="resourceBar"></div>
+  <div id="game">
+    <div id="mapPanel">
+      <div id="map"></div>
+    </div>
+    <div id="sidebar">
+      <div class="panel" id="infoPanel">
+        <strong>Your Empire</strong>
+        <div class="progressBar"><div class="inner" id="progressInner"></div></div>
+        <table class="resource-table"><tr>
+          <td>Food 🍎:</td> <td id="food"></td></tr>
+          <tr><td>Gold 💰:</td> <td id="gold"></td></tr>
+          <tr><td>Science 🔬:</td> <td id="science"></td></tr>
+        </table>
+        <span id="cities"></span>, <span id="armies"></span>
+      </div>
+      <div class="panel action-btns" id="tileActions"></div>
+      <button id="endturn">End Turn</button>
+      <button id="showTechs">Tech Upgrades 🔬</button>
+      <button id="hydrogenNukeBtn">Hydrogen Nuke</button>
+      <div id="techPanel">
+        <h3>Tech Upgrades</h3>
+        <div id="techBtns"></div>
+        <div id="techStatus"></div>
+      </div>
+      <div class="panel log" id="log"></div>
+    </div>
+  </div>
+  <div class="footer">
+    <strong>Island Empire &bull; Created by Adrian Villalon (<a href="https://github.com/AdrianVilla14" target="_blank" style="color:#70f3e3">github.com/AdrianVilla14</a>) &bull; 2025 &mdash; All rights reserved.</strong>
+  </div>
+  <div id="floatingMsg"></div>
+  <div id="nukeModal">
+    <div id="nukeModalContent">
+      <strong>Bro, you really want to nuke your Empire?</strong><br><br>
+      <button id="nukeYes">Yes, Nuke it 💣</button>
+      <button id="nukeNo">Cancel</button>
+    </div>
+  </div>
+  <audio id="audioClick" src="https://cdn.pixabay.com/audio/2022/07/26/audio_115b943601.mp3"></audio>
+  <audio id="audioAttack" src="https://cdn.pixabay.com/audio/2022/03/15/audio_11583b6a12.mp3"></audio>
+  <audio id="audioSuccess" src="https://cdn.pixabay.com/audio/2022/03/15/audio_1158639dba.mp3"></audio>
+  <script>
+/* --- Game constants, definitions --- */
+const MAP_SIZE = 10;
+const NUM_AIS = 2;
+
+const TERRAINS = ["grass", "forest", "mountain", "water"];
+const TERRAIN_EMOJI = { grass: "🌾", forest: "🌳", mountain: "⛰️", water: "🌊" };
+const terrainYields = {
+  grass: { food: 2, gold: 1, science: 0 },
+  forest: { food: 1, gold: 2, science: 1 },
+  mountain: { food: 0, gold: 3, science: 2 },
+  water: { food: 0, gold: 0, science: 3 }
+};
+
+let map, player, AIs, turn, logLines = [], selected = null, techs = {};
+let techDefs = [
+  { id:'doubleFood', name:'Improved Agriculture', cost: { science:22 }, desc:'Double food gain from grass & forest.', 
+    effect:()=>{ terrainYields.grass.food*=2; terrainYields.forest.food*=2; } },
+  { id:'ironFoundry', name:'Iron Foundry', cost:{science:27,gold:25}, desc:'Armies +1 attack; Mountains give +1 science.',
+    effect:()=>{ terrainYields.mountain.science+=1; } },
+  { id:'engineering', name:'Engineering', cost:{science:29,gold:18}, desc:'Cities cost 10 less Gold.', effect:()=>{ player.cityDiscount=10; } },
+  { id:'naval', name:'Naval Expansion', cost:{science:32,food:18}, desc:'Expand onto water, earn gold for water tiles.',
+    effect:()=>{ terrainYields.water.gold=2; } }
+];
+
+// Gameplay upgrade: Special Event (Storm, Treasure, Sabotage)
+function randomEvent() {
+  const roll = Math.random();
+  if (roll < 0.04) {
+    showFloatingMsg("⚡ Storm hits! Lose 5 food 💥");
+    player.food = Math.max(0, player.food - 5);
+    logAction("A storm struck! Lost 5 food.");
+  } else if (roll < 0.08) {
+    player.gold += 10;
+    showFloatingMsg("💎 Found Treasure! +10 Gold");
+    logAction("You found treasure (+10 Gold)!");
+  } else if (roll < 0.11) {
+    if (player.science > 6) {
+      player.science -= 6;
+      showFloatingMsg("🕵️‍ Enemy Sabotage! Lose 6 Science");
+      logAction("Enemy sabotage! -6 science.");
+    }
+  }
+  updateSidebar();
+  saveGame();
+}
+
+function techUnlocked(id){ return !!techs[id]; }
+function unlockTech(id){
+  let t = techDefs.find(i=>i.id===id);
+  for(const res in t.cost){player[res]-=t.cost[res];}
+  techs[id]=true; if(t.effect) t.effect();
+  showFloatingMsg("Tech unlocked: "+t.name+"!");
+  updateSidebar(); updateTechPanel();
+  playSound('audioSuccess');
+  saveGame();
+}
+
+function canAfford(cost){
+  for(const res in cost){if(player[res]<cost[res]) return false;}
+  return true;
+}
+
+/* --- Save/Load logic using localStorage --- */
+const SAVEKEY = "IslandEmpireGame_Ultimate";
+function saveGame() {
+  try {
+    localStorage.setItem(SAVEKEY, JSON.stringify({
+      map, player, turn, logLines, selected, techs
+    }));
+  } catch (e) {}
+}
+function loadGame() {
+  let data = localStorage.getItem(SAVEKEY);
+  if (!data) return false;
+  try {
+    let g = JSON.parse(data);
+    map = g.map; player = g.player; turn = g.turn; logLines = g.logLines;
+    selected = g.selected; techs = g.techs || {};
+    return true;
+  } catch (e) { return false }
+}
+function clearGame() { localStorage.removeItem(SAVEKEY); }
+/* --- Game engine --- */
+function randInt(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
+function isNeighbor(a, b) { return Math.abs(a.x - b.x) + Math.abs(a.y - b.y) == 1; }
+function canSee({ x, y }) {
+  for (const t of getEmpireTiles("player"))
+    if (isNeighbor(t, { x, y }) || (t.x === x && t.y === y)) return true;
+  return false;
+}
+function createMap() {
+  map = [];
+  for (let y = 0; y < MAP_SIZE; ++y) {
+    let row = [];
+    for (let x = 0; x < MAP_SIZE; ++x) {
+      let terrain = (Math.random() < 0.12) ? "mountain" :
+        (Math.random() < 0.14) ? "water" :
+        (Math.random() < 0.20) ? "forest" : "grass";
+      row.push({ x, y, terrain, owner: null, army: null, city: false, aiId: null, fortified: false });
+      // 3D style randomized selection for fun visuals
+      if (terrain == "forest" && Math.random() > 0.5) row[row.length-1].threeD = "forest3d";
+      if (terrain == "water" && Math.random() > 0.4) row[row.length-1].threeD = "water3d";
+    }
+    map.push(row);
+  }
+  let px = randInt(0, 2), py = randInt(0, 2);
+  map[py][px].owner = "player"; map[py][px].city = true;
+  let AIcoords = [ [MAP_SIZE - 1, MAP_SIZE - 1], [MAP_SIZE - 1, 0], [0, MAP_SIZE - 1] ];
+  for (let i = 0; i < NUM_AIS; ++i) {
+    let [ax, ay] = AIcoords[i];
+    map[ay][ax].owner = "ai"; map[ay][ax].aiId = i; map[ay][ax].city = true;
+  }
+}
+function getEmpireTiles(who) {
+  return map.flat().filter(t => t.owner === who);
+}
+
+function updateSidebar() {
+  let ownedTiles = getEmpireTiles("player");
+  let food = 0, gold = 0, science = 0, cities = 0, armies = 0;
+  for (const t of ownedTiles) {
+    let ty = terrainYields[t.terrain], scale = t.city ? 2 : 1;
+    food += ty.food * scale; gold += ty.gold * scale; science += ty.science * scale;
+    if (t.city) cities++; if (t.army) armies++;
+  }
+  document.getElementById("food").textContent = player.food + ` ( +${food} )`;
+  document.getElementById("gold").textContent = player.gold + ` ( +${gold} )`;
+  document.getElementById("science").textContent = player.science + ` ( +${science} )`;
+  document.getElementById("cities").textContent = cities + " Cities";
+  document.getElementById("armies").textContent = armies + " Armies";
+  let resBar = document.getElementById("resourceBar");
+  resBar.innerHTML = `
+    <span>🍎 ${player.food}</span>
+    <span>💰 ${player.gold}</span>
+    <span>🔬 ${player.science}</span>
+    <span><strong>Turn ${turn}</strong></span>
+    <span>🏛️ ${cities} / 🛡️ ${armies}</span>
+  `;
+  let empireProgress = ownedTiles.length / map.flat().length;
+  document.getElementById("progressInner").style.width = (empireProgress * 100) + "%";
+}
+function renderMap() {
+  let mdiv = document.getElementById("map");
+  mdiv.innerHTML = "";
+  for (let y = 0; y < MAP_SIZE; ++y) {
+    let rowdiv = document.createElement("div");
+    rowdiv.className = "row";
+    for (let x = 0; x < MAP_SIZE; ++x) {
+      let t = map[y][x];
+      let b = document.createElement("div");
+      b.className = "tile";
+      let fogged = !canSee(t) && t.owner !== "player";
+      if (fogged) b.classList.add("fog");
+      let ownercl =
+        t.owner === "player" ? "player-owned" :
+        (t.owner === "ai" ? "ai-owned" : "");
+      if (ownercl) b.classList.add(ownercl);
+      if (t.city) b.classList.add("city");
+      if (t.army) b.classList.add("army");
+      b.classList.add(t.terrain);
+      if (t.threeD) b.classList.add(t.threeD);
+      b.dataset.x = x; b.dataset.y = y;
+      if (selected && selected.x == x && selected.y == y)
+        b.classList.add("selected");
+      b.title = (fogged) ? "Unknown Territory" :
+        (t.city ? "City - " : "") +
+        "Terrain: " + t.terrain +
+        "\n" + (t.owner ? ("Controlled by " +
+          (t.owner === "player" ? "You" : "Enemy")) : "Unclaimed") +
+        (t.army ? " (Army here!)" : "") +
+        (t.fortified ? " (Fortified)" : "");
+
+      let icons = "";
+      if (!fogged) {
+        icons += `<span class="icon">${TERRAIN_EMOJI[t.terrain]}</span>`;
+        if (t.city) icons += `<span class="icon city-anim" title="City">🏛️</span>`;
+        if (t.army) icons += `<span class="icon army-anim" title="Army">🛡️</span>`;
+      } else {
+        icons = `<span class="icon">?</span>`;
+      }
+      b.innerHTML = icons;
+
+      b.onclick = () => {
+        selected = { x, y };
+        renderMap();
+        showTileActions();
+        showTilePreview(t);
+        scrollToTile(b);
+        playSound("audioClick");
+        saveGame();
+      };
+      b.onmouseenter = () => {
+        b.classList.add("preview");
+        showTilePreview(t);
+      };
+      b.onmouseleave = () => {
+        b.classList.remove("preview");
+        let previewRes = document.getElementById("previewResource");
+        if (previewRes) previewRes.remove();
+      };
+      rowdiv.appendChild(b);
+    }
+    mdiv.appendChild(rowdiv);
+  }
+}
+function scrollToTile(tileElem) {
+  let rect = tileElem.getBoundingClientRect();
+  if (rect.top < -10 || rect.bottom > window.innerHeight - 60)
+    tileElem.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function showTilePreview(tile) {
+  let sidebar = document.getElementById("sidebar");
+  let old = document.getElementById("previewResource");
+  if (old) old.remove();
+  // Show for all tiles, not just owned
+  let yields = terrainYields[tile.terrain];
+  let cityBonus = tile.city ? 2 : 1;
+  let eventBonus = (tile.terrain == "mountain" && techUnlocked('ironFoundry')) ? "+1 Science (Tech)" : "";
+  let txt = `
+    <div id="previewResource" class="previewResource">
+     <b>Tile Preview:</b><br>
+     <span title="Food per turn">🍎 Food: <b>${yields.food*cityBonus}</b></span> &nbsp;
+     <span title="Gold per turn">💰 Gold: <b>${yields.gold*cityBonus}</b></span> &nbsp;
+     <span title="Science per turn">🔬 Science: <b>${yields.science*cityBonus}</b> ${eventBonus}</span>
+     ${tile.city ? "<br>🏛️ <b>City:</b> Yields x2 on this tile" : ""}
+     ${tile.army ? "<br>🛡️ <b>Army:</b> Defend or attack with this tile" : ""}
+     ${tile.owner ? "<br>" + (tile.owner === "player" ? "Your Empire" : "AI Rival") : "<br><b>Unclaimed</b> (Buy to add!)"}
+    </div>
+  `;
+  sidebar.insertAdjacentHTML("afterbegin", txt);
+}
+
+function showTileActions() {
+  const div = document.getElementById("tileActions");
+  div.innerHTML = "";
+  if (!selected) {
+    div.innerHTML = "<strong>Select a tile for actions.</strong>";
+    return;
+  }
+  let t = map[selected.y][selected.x];
+  let isMine = t.owner === "player", isAI = t.owner === "ai", neutral = !t.owner;
+  if (isMine) {
+    div.innerHTML += `<b>Tile actions:</b><br>`;
+    if (!t.city && !t.army)
+      div.innerHTML += `<button onclick="buildCity()">Build city (${getCityCost()} Gold, 12 Science)</button>`;
+    if (!t.army)
+      div.innerHTML += `<button onclick="recruitArmy()">Recruit army (16 Gold, 16 Food)</button>`;
+    div.innerHTML += `<button onclick="fortifyTile()">Fortify tile (+Defense, 10 Science)</button>`;
+    if (!t.city && !t.army) {
+      div.innerHTML += `<button onclick="abandonTile()">Abandon tile</button>`;
+    }
+    div.innerHTML += `<br><i>Tip: Right-click tile to expand instantly!</i>`;
+  }
+  else if (neutral) {
+    let ownedAdj = getEmpireTiles("player").some(i => isNeighbor(i, t));
+    if (ownedAdj || (t.terrain === "water" && techUnlocked('naval') && isWaterAdjOwned(t))) {
+      div.innerHTML = `<button onclick="claimTile()">Expand here (11 Gold)</button>`;
+    } else {
+      div.innerHTML = `<i>Must expand from adjacent tile (or unlock Naval Expansion).</i>`;
+    }
+  }
+  else if (isAI) {
+    let adjArmy = getEmpireTiles("player").some(i => isNeighbor(i, t) && i.army);
+    if (adjArmy) {
+      div.innerHTML = `<button onclick="attackTile()">Attack (Army required)</button>`;
+    } else {
+      div.innerHTML = `<i>Need adjacent army to attack!</i>`;
+    }
+  }
+}
+function getCityCost() { return 28 - (player.cityDiscount || 0); }
+function isWaterAdjOwned(t) { return getEmpireTiles("player").some(i => isNeighbor(i, t) && t.terrain === "water"); }
+function claimTile() {
+  let t = map[selected.y][selected.x];
+  if (player.gold < 11) return logAction("Not enough gold!");
+  t.owner = "player"; player.gold -= 11;
+  logAction(`Expanded into (${t.x},${t.y}), now yields per turn: ${tileYieldDesc(t)}`);
+  selected = null;
+  renderMap(); showTileActions(); updateSidebar(); playSound("audioSuccess"); saveGame();
+}
+function tileYieldDesc(t) {
+  let scale = t.city ? 2 : 1;
+  let bonus = '';
+  if (t.terrain === "mountain" && techUnlocked('ironFoundry'))
+    bonus = '+1 science';
+  return `Food: ${terrainYields[t.terrain].food*scale}, Gold: ${terrainYields[t.terrain].gold*scale}, Science: ${terrainYields[t.terrain].science*scale} ${bonus}`;
+}
+function buildCity() {
+  let t = map[selected.y][selected.x];
+  let cityCost = getCityCost();
+  if (player.gold < cityCost || player.science < 12) return logAction("Not enough resources!");
+  player.gold -= cityCost; player.science -= 12; t.city = true;
+  logAction("City built! This tile now yields double resources.");
+  renderMap(); showTileActions(); updateSidebar(); playSound("audioSuccess"); saveGame();
+}
+function recruitArmy() {
+  let t = map[selected.y][selected.x];
+  if (player.gold < 16 || player.food < 16) return logAction("Not enough resources!");
+  player.gold -= 16; player.food -= 16; t.army = { hp: 3, fortified: false };
+  logAction("Army recruited. This tile now serves defense or attack.");
+  renderMap(); showTileActions(); updateSidebar(); playSound("audioClick"); saveGame();
+}
+function fortifyTile() {
+  let t = map[selected.y][selected.x];
+  if (player.science < 10) return logAction("Not enough science!");
+  player.science -= 10;
+  if (t.army) t.army.fortified = true; else t.fortified = true;
+  logAction("Tile fortified. More resistant to attack.");
+  renderMap(); showTileActions(); updateSidebar(); playSound("audioClick"); saveGame();
+}
+function abandonTile() {
+  let t = map[selected.y][selected.x];
+  t.owner = null;
+  logAction(`Tile (${t.x},${t.y}) abandoned.`);
+  selected = null; renderMap(); showTileActions(); updateSidebar(); playSound("audioClick"); saveGame();
+}
+function attackTile() {
+  let t = map[selected.y][selected.x];
+  let attackers = getEmpireTiles("player").filter(i => isNeighbor(i, t) && i.army);
+  if (attackers.length == 0) return logAction("Need adjacent army!");
+  let atk = attackers[0], defArmy = t.army;
+  let atkPower = atk.army.fortified ? 2.85 : 1.85;
+  let defPower = defArmy ? (defArmy.fortified ? 2.5 : 1.65) : 1.05;
+  let roll = randInt(1, 100), win = (atkPower * roll > defPower * 71);
+  floatingTileAnim(t.x, t.y, win ? "attackwin" : "attackloss");
+  playSound("audioAttack");
+  if (win) {
+    t.owner = "player"; t.army = atk.army; atk.army = null; t.city = false; t.aiId = null;
+    logAction("Victory! Tile conquered. Now yields: " + tileYieldDesc(t));
+    showFloatingMsg("Attack succeeded!");
+  } else {
+    atk.army = null;
+    logAction("Attack failed! Lost the army.");
+    showFloatingMsg("Attack failed!");
+  }
+  renderMap(); showTileActions(); updateSidebar(); saveGame();
+}
+document.getElementById("map").oncontextmenu = function(e) {
+  e.preventDefault();
+  if (!selected) return false;
+  let t = map[selected.y][selected.x];
+  if (!t.owner &&
+    (getEmpireTiles("player").some(i => isNeighbor(i, t)) ||
+      (t.terrain === "water" && techUnlocked("naval") && isWaterAdjOwned(t))) ) {
+    claimTile();
+  }
+  return false;
+}
+function logAction(txt) {
+  logLines.push(`[Turn ${turn}] ${txt}`);
+  if (logLines.length > 8) logLines = logLines.slice(-8);
+  document.getElementById("log").innerHTML = logLines.map(i => i).join("<br>");
+  saveGame();
+}
+function showFloatingMsg(msg) {
+  let div = document.getElementById("floatingMsg");
+  div.textContent = "✨ " + msg + " ✨";
+  div.style.opacity = "0.91"; div.style.visibility = "visible";
+  div.style.animation = "floatMsg .9s cubic-bezier(.3,1.2,.69,.94) forwards";
+  setTimeout(() => { div.style.opacity = "0"; div.style.visibility = "hidden"; }, 1100);
+}
+function floatingTileAnim(x, y, type) {
+  let mdiv = document.getElementById("map");
+  let tile = mdiv.querySelector(`[data-x='${x}'][data-y='${y}']`);
+  if (tile) {
+    tile.style.zIndex = "20";
+    let color = type === "gain" ? "#fd0" :
+      type === "city" ? "#59e931" : type === "army" ? "#d22" :
+        type === "attackwin" ? "#23a872" : "#fa281b";
+    tile.classList.add("ownedAnim");
+    tile.style.boxShadow = `0 0 44px 8px ${color}`;
+    tile.style.transform = "scale(1.19) perspective(700px) rotateY(24deg)";
+    setTimeout(() => {
+      tile.style.boxShadow = "";
+      tile.style.transform = ""; tile.style.zIndex = "";
+      tile.classList.remove("ownedAnim");
+    }, 540);
+  }
+}
+function playSound(id) { let audio = document.getElementById(id); if (audio) { audio.currentTime = 0; audio.play(); } }
+function endTurn() {
+  turn++;
+  document.getElementById("endturn").classList.add("turn-flash");
+  setTimeout(() => { document.getElementById("endturn").classList.remove("turn-flash"); }, 450);
+  let ownedTiles = getEmpireTiles("player");
+  let food = 0, gold = 0, science = 0;
+  for (const t of ownedTiles) {
+    let y = terrainYields[t.terrain], scale = t.city ? 2 : 1;
+    food += y.food * scale; gold += y.gold * scale; science += y.science * scale; }
+  player.food += food; player.gold += gold; player.science += science;
+  updateSidebar();
+  randomEvent();
+  aiTurn();
+  renderMap();
+  checkWin();
+  saveGame();
+}
+function aiTurn() {
+  for (let i = 0; i < NUM_AIS; ++i) {
+    let aimap = map.flat().filter(t => t.owner === "ai" && t.aiId === i);
+    let aiCities = aimap.filter(t => t.city);
+    let oppTiles = getEmpireTiles("player");
+    if (oppTiles.length === 0) continue;
+    let exptable = aimap.map(t => [t, getFreeNeighbors(t)]).filter(([t, arr]) => arr.length > 0);
+    if (exptable.length) {
+      let [from, opts] = exptable[randInt(0, exptable.length - 1)];
+      let tgt = opts[randInt(0, opts.length - 1)];
+      map[tgt.y][tgt.x].owner = "ai"; map[tgt.y][tgt.x].aiId = i; floatingTileAnim(tgt.x, tgt.y, "gain");
+      continue;
+    }
+    let armyTiles = aimap.filter(t => t.army);
+    for (let army of armyTiles) {
+      let adj = oppTiles.filter(pt => isNeighbor(pt, army));
+      if (adj.length) {
+        let tgt = adj[randInt(0, adj.length - 1)];
+        let atkPower = army.army.fortified ? 2.35 : 1.7;
+        let defPower = (tgt.army ? (tgt.army.fortified ? 2 : 1.5) : 1);
+        let roll = randInt(1, 100);
+        let win = (atkPower * roll > defPower * 72.2);
+        floatingTileAnim(tgt.x, tgt.y, win ? "attackwin" : "attackloss");
+        if (win) {
+          tgt.owner = "ai"; tgt.aiId = i; tgt.city = false;
+          logAction(`AI captured (${tgt.x},${tgt.y})`);
+        } else {
+          army.army = null;
+        }
+      }
+    }
+    let richest = aimap[randInt(0, aimap.length - 1)];
+    if (richest && !richest.army && randInt(0, 2) == 0)
+      richest.army = { hp: 2, fortified: false };
+  }
+}
+function getFreeNeighbors(t) {
+  return [[t.x + 1, t.y], [t.x - 1, t.y], [t.x, t.y + 1], [t.x, t.y - 1]]
+    .filter(([x, y]) => x >= 0 && x < MAP_SIZE && y >= 0 && y < MAP_SIZE)
+    .map(([x, y]) => map[y][x])
+    .filter(nt => !nt.owner);
+}
+function checkWin() {
+  let playerTiles = getEmpireTiles("player").length;
+  let aiTiles = getEmpireTiles("ai").length;
+  if (playerTiles === 0) {
+    alert("You lost! All your territory is gone."); clearGame();
+    location.reload();
+  } else if (aiTiles === 0) {
+    alert("You conquered all rivals! You win!"); clearGame();
+    location.reload();
+  }
+}
+function startNewGame() {
+  player = { food:32, gold:30, science:16, cityDiscount:0 };
+  AIs = []; techs = {};
+  turn = 1; logLines = [];
+  createMap();
+  selected = null;
+  document.getElementById("endturn").onclick = endTurn;
+  document.getElementById("showTechs").onclick = () => toggleTechPanel();
+  renderMap(); updateSidebar(); showTileActions(); updateTechPanel();
+  logAction("Your ultimate empire journey begins!");
+  saveGame();
+}
+function updateTechPanel() {
+  let btns = document.getElementById("techBtns"), status = document.getElementById("techStatus");
+  let output = "";
+  for (const tech of techDefs) {
+    if (techUnlocked(tech.id)) {
+      output += `<button disabled>✔️ ${tech.name}</button>`;
+    } else {
+      let can = canAfford(tech.cost);
+      output += `<button ${can ?
+        `onclick='unlockTech("${tech.id}")'` : "disabled"}>
+      ${can ? "🔬" : "🔒"} ${tech.name}<br>
+      <small>${Object.entries(tech.cost).map(([r, v]) => r + ":" + v).join(',')}</small></button>`;
+    }
+    output += "<br>";
+  }
+  btns.innerHTML = output;
+  status.innerHTML = Object.keys(techs).length ?
+    `Unlocked: <strong>${Object.keys(techs).length}</strong> / ${techDefs.length}` :
+    "No techs unlocked. Collect Science to unlock bonuses!";
+}
+function toggleTechPanel() {
+  let techPanel = document.getElementById("techPanel");
+  techPanel.style.display = techPanel.style.display === "block" ? "none" : "block";
+  document.getElementById("showTechs").classList.toggle("selected");
+}
+document.getElementById("hydrogenNukeBtn").onclick = function () {
+  document.getElementById("nukeModal").style.display = "flex";
+};
+document.getElementById("nukeNo").onclick = function () {
+  document.getElementById("nukeModal").style.display = "none";
+};
+document.getElementById("nukeYes").onclick = function () {
+  clearGame();
+  document.getElementById("nukeModal").style.display = "none";
+  showFloatingMsg("Your empire is nuked. Game reset.");
+  setTimeout(() => { location.reload(); }, 600);
+};
+document.getElementById("closeHowTo").onclick = function () {
+  document.getElementById("howToModal").style.display = "none";
+};
+document.getElementById("howToIcon").onclick = function () {
+  document.getElementById("howToModal").style.display = "flex";
+};
+
+/* --- First load detection --- */
+function checkFirstVisit() {
+  if (!localStorage.getItem(SAVEKEY + "_tutorial")) {
+    document.getElementById("howToModal").style.display = "flex";
+    localStorage.setItem(SAVEKEY + "_tutorial", "shown");
+  }
+}
+function mainAppStart() {
+  if (loadGame()) {
+    renderMap(); updateSidebar(); showTileActions(); updateTechPanel();
+    logAction("Welcome back Emperor! ⏳");
+    setTimeout(checkFirstVisit, 400);
+  } else {
+    startNewGame();
+    setTimeout(checkFirstVisit, 600);
+  }
+}
+mainAppStart();
+  </script>
+</body>
+</html>
